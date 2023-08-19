@@ -1,37 +1,50 @@
 package com.kallwies.todolist.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
+
 
 public class TaskList {
-    static ArrayList<Task> tasks = new ArrayList<>();
+    ArrayList<Task> tasks = new ArrayList<>();
 
-    void addTask(Task task) {
+    public void addTask(Task task) {
         tasks.add(task);
     }
 
-    void displayTasks() {
+    public void displayTasks() {
         for (int i=0; i < tasks.size();i++) {
         	System.out.println(tasks.get(i).getTitle());
         }
     }
 
-    void markTaskAsCompleted(int index) {
-        // Markiere eine Aufgabe als erledigt
+    public void markTaskAsCompleted(int index) {
+    	if (index <= tasks.size()) {
+    		tasks.get(index).setCompleted(true);
+    	} else { System.out.println("index Out of Range");}
     }
 
     void editTask(int index) {
-        // Bearbeite die Details einer Aufgabe
+        // Bearbeite die Details einer Aufgabe /TODO
     }
 
-    void deleteTask(int index) {
-        // Lösche eine Aufgabe aus der Liste
+    public void deleteTask(int index) {
+    	if (index <= tasks.size()) {
+    		tasks.remove(index);
+    	} else { System.out.println("index Out of Range");}
+    }
+    
+    public void clearTasks() {
+    	for (int i=0; i < tasks.size();i++) {
+    		deleteTask(i);
+    	}
+    	
     }
 
-    void sortTasksByDueDate() {
-        // Sortiere die Aufgaben nach Fälligkeitsdatum
+    public void sortTasksByDueDate() {
+    	Collections.sort(tasks, new BirthdayComparator());
     }
 
-    public static ArrayList<Task> getTasks() {
+    public ArrayList<Task> getTasks() {
     	return tasks;
     }
 }
