@@ -1,8 +1,9 @@
 package com.kallwies.todolist.controller;
 
-import com.kallwies.todolist.model.Task;
-import com.kallwies.todolist.model.TaskList;
+
 import java.util.ArrayList;
+import java.util.Map;
+
 
 // This is the Controller of the View/GUI
 // This Controller pulls from the other
@@ -17,19 +18,18 @@ public class FrontEndController implements IController {
 	
 	
 	public void handleAddButtonClick() {
-		
-		System.out.println("hello");
+		backEnd.handleAddButtonClick();
 	}
 
 	
 	@Override
-	public TaskList loadXml(String filePath) {
+	public ArrayList<Map<String, Object>> loadXml(String filePath) {
 		return backEnd.loadXml(filePath);
 	}
 	
 	@Override
-	public void saveXml(ArrayList<Task> list, String filePath) {
-		backEnd.saveXml(list, filePath);
+	public void saveXml(ArrayList<Map<String, Object>> tasks, String filePath) {
+		backEnd.saveXml(tasks, filePath);
 	}
 
 	

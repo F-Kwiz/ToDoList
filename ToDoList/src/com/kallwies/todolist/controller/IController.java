@@ -1,12 +1,13 @@
 package com.kallwies.todolist.controller;
 
 import com.kallwies.todolist.model.*;
+import java.util.Map;
 import java.util.ArrayList;
 
 
 public interface IController {
 	void handleAddButtonClick();
 	
-	TaskList loadXml(String filePath);
-	void saveXml(ArrayList<Task> list, String filePath);
+	ArrayList<Map<String, Object>> loadXml(String filePath);
+	void saveXml(ArrayList<Map<String, Object>> list, String filePath);
 }

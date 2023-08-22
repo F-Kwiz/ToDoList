@@ -1,35 +1,45 @@
 package com.kallwies.todolist.view;
 
-import com.kallwies.todolist.model.*;
+
 import com.kallwies.todolist.controller.*;
+
 import javafx.application.*;
 import javafx.event.ActionEvent;
 import javafx.stage.*;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.layout.*;
 import javafx.scene.text.*;
 import javafx.geometry.*;
 import javafx.event.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 
 
 public class GUI extends Application {
+	
 	static FrontEndController controller = new FrontEndController();
 	static String filePath = "src/com/kallwies/todolist/controller/data.xml";
-	static String savePath = "src/com/kallwies/todolist/controller/datasa.xml";
+	static String savePath = "src/com/kallwies/todolist/controller/new.xml";
+	StackPane mainWindow = new StackPane();
 	
-    static TableView<Task> tableView = new TableView<>();
+	
+    TableView tableView = new TableView();
+    EditWindow overlayWindow = new EditWindow();
     
     
 	@Override
 	public void start(Stage main) throws Exception {
         main.setTitle("Tasks");
     	Font titleFont = Font.font("Arial", FontWeight.BOLD, 30);
-        
-        VBox root = new VBox();
+    	
+        VBox listWindow = new VBox();
         
         	Label title = new Label("Tasks");
         	title.setAlignment(Pos.CENTER);
@@ -45,7 +55,7 @@ public class GUI extends Application {
 		        addButton.setOnAction(new EventHandler<ActionEvent>() {
 		            @Override
 		            public void handle(ActionEvent event) {
-		                controller.handleAddButtonClick();
+		                handleAddButtonClick();
 		            }});
 		        // lambda alternative
 		        //addButton.setOnAction(event -> controller.handleAddButtonClick());
@@ -58,74 +68,94 @@ public class GUI extends Application {
 		        Button saveButton = new Button("Save");
 		        saveButton.setOnAction(event -> handleSaveButtonClick());
 		        
-		        
 		        menu.getChildren().add(addButton);
 		        menu.getChildren().add(loadButton);
 		        menu.getChildren().add(saveButton);
-        
-		        //Table
-		        TableColumn<Task, String> nameColumn = new TableColumn<>("Task Name");
-		        TableColumn<Task, String> descriptionColumn = new TableColumn<>("Description");
-		        TableColumn<Task, Integer> dayColumn = new TableColumn<>("Day");
-		        TableColumn<Task, Integer> monthColumn = new TableColumn<>("Month");
-		        TableColumn<Task, Integer> yearColumn = new TableColumn<>("Year");
-		        
-		        nameColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-		        descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		        dayColumn.setCellValueFactory(new PropertyValueFactory<>("day"));
-		        monthColumn.setCellValueFactory(new PropertyValueFactory<>("month"));
-		        yearColumn.setCellValueFactory(new PropertyValueFactory<>("year"));
 
+		        
+		        
+		        // Add a Box for the TableView
 		        VBox listbox = new VBox(tableView);
-		        tableView.getColumns().addAll(nameColumn, descriptionColumn, dayColumn, monthColumn, yearColumn);
         
         
 	        menus.getChildren().add(menu);
 	        menus.getChildren().add(listbox);
         
-        root.getChildren().add(title);
-        root.getChildren().add(menus);
+	    //
+	   listWindow.getChildren().add(title);
+	   listWindow.getChildren().add(menus);
         
-        Scene scene = new Scene(root, 400, 200);
+        
+        mainWindow.getChildren().add(listWindow);
+        mainWindow.getChildren().add(overlayWindow);
+        mainWindow.setMargin(overlayWindow, new Insets(100));
+        
+        Scene scene = new Scene(mainWindow, 800, 640);
         main.setScene(scene);
         
         // Listener to adjust the Width of the Objects
         main.widthProperty().addListener((obs, oldValue, newValue) -> {
             double windowWidth = main.getWidth();
-            root.setPrefWidth(windowWidth);
+            listWindow.setPrefWidth(windowWidth);
             title.setPrefWidth(windowWidth);
             menu.setPrefWidth(windowWidth / 12);
             listbox.setPrefWidth(windowWidth-(windowWidth/12*2));
         });
         
+        
         main.show();   
 
 	}
 	
-	public static void handleAddButton(ActionEvent event) {
-		System.out.println(event.getEventType());
+	
+	
+	public void handleAddButtonClick() {
+		
+		overlayWindow.createAddWindow();
 		
 	}
 	
 	public void handleLoadButtonClick() {
-		TaskList list = controller.loadXml(filePath);
+		ArrayList<Map<String, Object>> list = controller.loadXml(filePath);
 		fillListView(list);
 	}
 	
 	public void handleSaveButtonClick() {
-		ArrayList<Task> tasks = new ArrayList<>(tableView.getItems());
-		controller.saveXml(tasks, savePath);
+		ArrayList<Map<String, Object>> mapList = new ArrayList<>();
+		for (Object value: tableView.getItems()) {
+			mapList.add((Map<String, Object>) value);
+		}
+		controller.saveXml(mapList, savePath);
 		
 	}
 	
 	
-	public static void fillListView(TaskList list) {
+	public void fillListView(ArrayList<Map<String, Object>> list) {
+		
 		tableView.getItems().clear();
+		tableView.getColumns().clear();
 		
-        for (int i=0; i < list.getTasks().size();i++) {
-        	tableView.getItems().addAll(list.getTasks().get(i));
+		ObservableList<Map<String, Object>> items =
+			    FXCollections.<Map<String, Object>>observableArrayList();
+		Map<String, Object> item1 = new HashMap<>();
+
+		// Goes through the first object in the list and creates columns for all keys of it
+        for (String key : list.get(0).keySet()) {
+    		TableColumn<Map, String> column = new TableColumn<>(key);
+    		column.setCellValueFactory(new MapValueFactory<>(key));
+    		tableView.getColumns().add(column);
         }
-		
+        
+        // Goes through all Objects in the list and saves them into an variable which holds it for tableView
+        for (Map<String, Object> Element: list) {
+        	for (String key: Element.keySet()) {
+        		item1.put(key, Element.get(key));
+        	}
+        	items.add(new HashMap<>(item1));
+        	item1.clear();
+        }
+        
+        tableView.getItems().addAll(items);
 	}
 
 

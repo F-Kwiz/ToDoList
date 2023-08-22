@@ -1,5 +1,7 @@
 package com.kallwies.todolist.model;
 
+import java.util.Map;
+
 public class Task {
     public String title;
     public String description;
@@ -9,6 +11,14 @@ public class Task {
     public boolean completed;
     
     
+    public Task(){
+    	title = "";
+    	description = "";
+    	day = 0;
+    	this.month = 0;
+    	this.year = 0;
+    }
+    
     public Task(String n_title, String n_description, int n_Date, int month, int year){
     	title = n_title;
     	description = n_description;
@@ -16,6 +26,47 @@ public class Task {
     	this.month = month;
     	this.year = year;
     }
+    
+    
+    public void fillWithMap(Map<String, Object> map) {
+        try {
+    	for (String key: map.keySet()) {
+    		switch (key) {
+    		case "title":
+    			if (map.get(key) instanceof String) {
+    			setTitle((String) map.get(key));
+    			}
+    			break;
+    		case "description":
+    			if (map.get(key) instanceof String) {
+    			setDescription((String) map.get(key));
+    			}
+    			break;
+    		case "day":
+    			if (map.get(key) instanceof String) {
+    			setDay(Integer.parseInt((String) map.get(key)));
+    			}
+    			break;
+    		case "month":
+    			if (map.get(key) instanceof String) {
+    			setMonth(Integer.parseInt((String) map.get(key)));
+    			}
+    			break;
+    		case "year":
+    			if (map.get(key) instanceof String) {
+    			setYear(Integer.parseInt((String) map.get(key)));
+    			}
+    			break;
+            }
+    	}
+        }
+    	catch (NumberFormatException e) {
+                System.out.println("Invalid numeric string");
+                //e.printStackTrace();
+    		}
+    	
+    }
+    
     
 	public String getTitle() {
 		return title;

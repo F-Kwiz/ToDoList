@@ -1,8 +1,8 @@
 package com.kallwies.todolist.controller;
 
 import com.kallwies.todolist.model.*;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 
 public class BackEndController implements IController {
@@ -21,28 +21,33 @@ public class BackEndController implements IController {
     }
 
     @Override
-    public TaskList loadXml(String filePath) {
+    public ArrayList<Map<String, Object>> loadXml(String filePath) {
     	
-        List<Task> itemList = XmlHandler.XmlLoader.load(filePath);
+        ArrayList<Map<String, Object>> itemList = XmlHandler.XmlLoader.load(filePath);
         
         taskList.clearTasks();
         
-        for (Task item : itemList) {
-        	taskList.addTask(item);
+        // Logic to fill tasklist
+        for (Map<String, Object> itemMap : itemList) {
+        	Task task = new Task();
+        	task.fillWithMap(itemMap);
+        	taskList.addTask(task);
         }
         
-        return taskList;     
+        taskList.sortTasksByDueDate();
+        
+        return taskList.createArrayList();     
     }
    
 	@Override
-	public void saveXml(ArrayList<Task> list, String filePath) {
+	public void saveXml(ArrayList<Map<String, Object>> list, String filePath) {
 		XmlHandler.XmlSaver.createXmlFile(list, filePath);
 	}
 	
 
 	@Override
 	public void handleAddButtonClick() {
-		// TODO Auto-generated method stub
+		taskList.addTask(null);
 		
 	}
 

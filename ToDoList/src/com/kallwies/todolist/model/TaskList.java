@@ -1,6 +1,8 @@
 package com.kallwies.todolist.model;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Collections;
 
 
@@ -8,7 +10,9 @@ public class TaskList {
     ArrayList<Task> tasks = new ArrayList<>();
 
     public void addTask(Task task) {
+    	if (task != null) {
         tasks.add(task);
+    	}
     }
 
     public void displayTasks() {
@@ -34,16 +38,38 @@ public class TaskList {
     }
     
     public void clearTasks() {
-    	for (int i=0; i < tasks.size();i++) {
-    		deleteTask(i);
+		int size = tasks.size();
+    	for (int i=0; i < size; i++) {
+    		deleteTask(0);
     	}
-    	
+    	System.out.println(tasks);
     }
 
     public void sortTasksByDueDate() {
     	Collections.sort(tasks, new BirthdayComparator());
     }
-
+    
+    
+    public ArrayList<Map<String,Object>> createArrayList() {
+    	
+    	ArrayList<Map<String,Object>> maplist = new ArrayList<>();
+    	
+    	for (Task task: tasks) {
+    		Map<String,Object> attributes = new HashMap<>();
+    		attributes.put("title", task.getTitle());
+    		attributes.put("description", task.getDescription());
+    		attributes.put("day", task.getDay());
+    		attributes.put("month", task.getMonth());
+    		attributes.put("year", task.getYear());
+    		maplist.add((Map<String,Object>) attributes);
+    	}
+    	
+    	return maplist;
+    	
+    }
+    
+    
+    
     public ArrayList<Task> getTasks() {
     	return tasks;
     }

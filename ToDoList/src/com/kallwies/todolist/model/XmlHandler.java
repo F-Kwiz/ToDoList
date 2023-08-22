@@ -6,10 +6,11 @@ import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -19,26 +20,36 @@ public class XmlHandler {
 
 	static public class XmlLoader{
 		
-		static public List<Task> load(String filePath) {
-	        List<Task> itemList = new ArrayList<>();
+		private static Map<String,Object> itemMap = new HashMap<>();
+		private static ArrayList<Map<String, Object>> itemList = new ArrayList<>();
+
+		static public ArrayList<Map<String, Object>> load(String filePath) {
 	        
+			itemMap = new HashMap<>();
+			itemList = new ArrayList<>();
+			
 	        try {
+	        	// initiates the Parser for XML
 	            SAXBuilder saxBuilder = new SAXBuilder();
 	            Document document = saxBuilder.build(new File(filePath));
 	            
+	            
+	            // the root-element is tasklist
 	            Element rootElement = document.getRootElement();
+	            // throws all tasks under tasklist into an arraylist named itemElements
 	            List<Element> itemElements = rootElement.getChildren("task");
 	            
+	            // First Iterates through all tags of tag Task
+	            // Then in the next for-loop saves tagname and tagvalue into an Map
+	            // In the end there is an arraylist witch is filled with Maps with the information of every task
 	            for (Element itemElement : itemElements) {
-	                String title = itemElement.getChildText("title");
-	                String description = itemElement.getChildText("description");
-	                int day = Integer.parseInt(itemElement.getChildText("day"));
-	                int month = Integer.parseInt(itemElement.getChildText("month"));
-	                int year = Integer.parseInt(itemElement.getChildText("year"));
-	                Task item = new Task(title, description, day, month, year);
-	                itemList.add(item);
+	            	
+	            	for (Element item: itemElement.getChildren()) {
+	            		itemMap.put(item.getName(), item.getText());
+	            	}
+	            	itemList.add(new HashMap<>(itemMap));
+	                itemMap.clear();
 	            }
-	        
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	        }
@@ -47,19 +58,20 @@ public class XmlHandler {
 	    	}
 	}
 	
+	
 	static public class XmlSaver{
 		
-	    public static void createXmlFile(ArrayList<Task> list, String filePath) {
+	    public static void createXmlFile(ArrayList<Map<String, Object>> list, String filePath) {
 	        Element taskListElement = new Element("tasklist");
 	        Document document = new Document(taskListElement);
-
-	        for (Task task : list) {
+	        
+	        // Gehe durch alle Maps aus list
+	        for (Map<String, Object> tags : list) {
 	            Element taskElement = new Element("task");
-	            taskElement.addContent(new Element("title").setText(task.getTitle()));
-	            taskElement.addContent(new Element("description").setText(task.getDescription()));
-	            taskElement.addContent(new Element("day").setText(String.valueOf(task.getDay())));
-	            taskElement.addContent(new Element("month").setText(String.valueOf(task.getMonth())));
-	            taskElement.addContent(new Element("year").setText(String.valueOf(task.getYear())));
+	            // Save all information from Map into taskElement:Element
+		        for (String key : tags.keySet()) {
+		        	taskElement.addContent(new Element(key).setText((String) tags.get(key)));
+		        }
 	            taskListElement.addContent(taskElement);
 	        }
 
