@@ -6,8 +6,6 @@ import java.util.ArrayList;
 
 
 public interface IController {
-	void handleAddButtonClick();
-	
 	ArrayList<Map<String, Object>> loadXml(String filePath);
 	void saveXml(ArrayList<Map<String, Object>> list, String filePath);
 }

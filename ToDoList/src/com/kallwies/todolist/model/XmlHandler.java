@@ -70,11 +70,17 @@ public class XmlHandler {
 	            Element taskElement = new Element("task");
 	            // Save all information from Map into taskElement:Element
 		        for (String key : tags.keySet()) {
-		        	taskElement.addContent(new Element(key).setText((String) tags.get(key)));
+		            Object value = tags.get(key);
+		        	if (value instanceof String) {
+		                taskElement.addContent(new Element(key).setText((String) value));
+		            } else if (value instanceof Integer) {
+		                taskElement.addContent(new Element(key).setText(String.valueOf(value)));
+		            }
 		        }
-	            taskListElement.addContent(taskElement);
+	        taskListElement.addContent(taskElement);
 	        }
-
+		       
+		       
 	        XMLOutputter xmlOutputter = new XMLOutputter();
 	        xmlOutputter.setFormat(Format.getPrettyFormat());
 

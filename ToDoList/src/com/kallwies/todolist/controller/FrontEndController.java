@@ -3,6 +3,8 @@ package com.kallwies.todolist.controller;
 
 import java.util.ArrayList;
 import java.util.Map;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 
 // This is the Controller of the View/GUI
@@ -16,12 +18,6 @@ public class FrontEndController implements IController {
 		backEnd  = new BackEndController();
 	}
 	
-	
-	public void handleAddButtonClick() {
-		backEnd.handleAddButtonClick();
-	}
-
-	
 	@Override
 	public ArrayList<Map<String, Object>> loadXml(String filePath) {
 		return backEnd.loadXml(filePath);
@@ -32,5 +28,5 @@ public class FrontEndController implements IController {
 		backEnd.saveXml(tasks, filePath);
 	}
 
-	
+
 }

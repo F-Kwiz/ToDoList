@@ -26,16 +26,18 @@ public class GUI extends Application {
 	
 	static FrontEndController controller = new FrontEndController();
 	static String filePath = "src/com/kallwies/todolist/controller/data.xml";
-	static String savePath = "src/com/kallwies/todolist/controller/new.xml";
+	static String savePath = "src/com/kallwies/todolist/controller/data.xml";
 	StackPane mainWindow = new StackPane();
 	
 	
     TableView tableView = new TableView();
-    EditWindow overlayWindow = new EditWindow();
+	ObservableList<Map<String, Object>> tableItems = FXCollections.<Map<String, Object>>observableArrayList();
+    EditWindow overlayWindow = new EditWindow(this);
     
     
 	@Override
 	public void start(Stage main) throws Exception {
+		
         main.setTitle("Tasks");
     	Font titleFont = Font.font("Arial", FontWeight.BOLD, 30);
     	
@@ -60,6 +62,14 @@ public class GUI extends Application {
 		        // lambda alternative
 		        //addButton.setOnAction(event -> controller.handleAddButtonClick());
 		        
+		        //EDIT BUTTON
+		        Button editButton = new Button("Edit");
+		        editButton.setOnAction(event -> handleEditButtonClick());
+		        
+		        //DELETE BUTTON
+		        Button deleteButton = new Button("Delete");
+		        deleteButton.setOnAction(event -> handleDeleteButtonClick());
+		        
 		        //LOAD BUTTON
 		        Button loadButton = new Button("Load");
 		        loadButton.setOnAction(event -> handleLoadButtonClick());
@@ -69,6 +79,8 @@ public class GUI extends Application {
 		        saveButton.setOnAction(event -> handleSaveButtonClick());
 		        
 		        menu.getChildren().add(addButton);
+		        menu.getChildren().add(editButton);
+		        menu.getChildren().add(deleteButton);
 		        menu.getChildren().add(loadButton);
 		        menu.getChildren().add(saveButton);
 
@@ -82,8 +94,8 @@ public class GUI extends Application {
 	        menus.getChildren().add(listbox);
         
 	    //
-	   listWindow.getChildren().add(title);
-	   listWindow.getChildren().add(menus);
+	    listWindow.getChildren().add(title);
+	    listWindow.getChildren().add(menus);
         
         
         mainWindow.getChildren().add(listWindow);
@@ -102,18 +114,30 @@ public class GUI extends Application {
             listbox.setPrefWidth(windowWidth-(windowWidth/12*2));
         });
         
+        // sets observableList as source for TableView
+        tableView.setItems(tableItems);
         
         main.show();   
 
 	}
 	
 	
-	
 	public void handleAddButtonClick() {
 		
-		overlayWindow.createAddWindow();
+		overlayWindow.createAddWindow(tableView.getColumns());
 		
 	}
+	
+	public void handleEditButtonClick() {
+		overlayWindow.createEditWindow(tableView.getColumns());
+
+	}
+	
+	
+	public void handleDeleteButtonClick() {
+		tableItems.remove(tableView.getSelectionModel().selectedItemProperty().get());
+	}
+	
 	
 	public void handleLoadButtonClick() {
 		ArrayList<Map<String, Object>> list = controller.loadXml(filePath);
@@ -126,7 +150,6 @@ public class GUI extends Application {
 			mapList.add((Map<String, Object>) value);
 		}
 		controller.saveXml(mapList, savePath);
-		
 	}
 	
 	
@@ -135,8 +158,6 @@ public class GUI extends Application {
 		tableView.getItems().clear();
 		tableView.getColumns().clear();
 		
-		ObservableList<Map<String, Object>> items =
-			    FXCollections.<Map<String, Object>>observableArrayList();
 		Map<String, Object> item1 = new HashMap<>();
 
 		// Goes through the first object in the list and creates columns for all keys of it
@@ -151,14 +172,21 @@ public class GUI extends Application {
         	for (String key: Element.keySet()) {
         		item1.put(key, Element.get(key));
         	}
-        	items.add(new HashMap<>(item1));
+        	tableItems.add(new HashMap<>(item1));
         	item1.clear();
         }
         
-        tableView.getItems().addAll(items);
 	}
-
-
+	
+	
+	public void addItem(Map<String, Object> items) {
+		tableItems.add(items);
+	}
+	
+	public void editItem(Map<String, Object> item) {
+		Map<String, Object> selection = (Map<String, Object>) tableView.getSelectionModel().selectedItemProperty().get();
+		tableItems.set(tableItems.indexOf(selection),  item);
+	}
 	
     public static void main(String[] args) {
         Application.launch(args);
