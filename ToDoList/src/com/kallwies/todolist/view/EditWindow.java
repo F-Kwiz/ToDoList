@@ -1,9 +1,6 @@
 package com.kallwies.todolist.view;
 
 
-
-import javafx.collections.ObservableList;
-import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -18,20 +15,22 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
+import jfxtras.scene.control.agenda.Agenda;
+import jfxtras.scene.control.agenda.Agenda.Appointment;
 
-import java.util.HashMap;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 
 
 // Window opens with Columns as attribute field and you can edit them
-// click apply afterwards and will be saved into Tasklist
+// click apply afterwards and it will be saved
 
-// in create Mode you can add a new Task into TaskList
+// in create Mode you can add a new Task
 
 public class EditWindow extends BorderPane{
-    
-	GUI parent;
 	
 	// Style of the border of the window
     BorderStroke borderStroke = new BorderStroke(
@@ -46,14 +45,13 @@ public class EditWindow extends BorderPane{
     
     // body container
     HBox bodyContainer = new HBox();
-    GridPane grid = new GridPane(); // Verwenden Sie einen GridPane-Container
+    GridPane grid = new GridPane();
+	private Appointment appointment;
 
 
 
 	
-    public EditWindow(GUI parent) {
-    	
-    	this.parent = parent;
+    public EditWindow() {
     	
     	this.setBorder(new Border(borderStroke));
 	    setStyle("-fx-background-color: rgba(255, 255, 255, 1.0);");
@@ -63,11 +61,11 @@ public class EditWindow extends BorderPane{
 		    closeButton.setCancelButton(true);
 		    closeButton.setOnAction(event -> this.close());
 		    
-		     // HBox to hold the button
+		     // HBox that contains the close button to put it on the right side
 	        topContainer.getChildren().add(closeButton);
 	        topContainer.setAlignment(Pos.TOP_RIGHT);
 	        
-	        // Foot
+	        // Footer with another close and a create Button
 		    dismissButton.setOnAction(event -> this.close());
 		    applyButton.setOnAction(event -> this.create());
 		    
@@ -79,7 +77,7 @@ public class EditWindow extends BorderPane{
 		    
         
         setTop(topContainer);
-        grid.setHgap(10); // Abstand zwischen Spalten
+        grid.setHgap(10); // gab between columns
         bodyContainer.getChildren().add(grid);
         setCenter(bodyContainer);
         setBottom(bottomContainer);
@@ -87,48 +85,173 @@ public class EditWindow extends BorderPane{
     }
     
     
-    public void createAddWindow(ObservableList<TableColumn<?, ?>> columns) {
+    
+    /*
+     * 
+     * Import appointment-object and extract information into a Map<String, Object> to create an EditWindow
+     * 
+     */
+    public void editAppointment(Agenda.Appointment appointment) {
+    	
+		Map<String, Object> attributeMap = new LinkedHashMap<String, Object>();
+
+		
+    	attributeMap.put("title", appointment.getSummary());
+    	attributeMap.put("description", appointment.getDescription());
+    	
+    	// Makes sure to just use Strings in EditWindow
+        LocalDateTime startDateTime = (LocalDateTime) appointment.getStartLocalDateTime();
+        String formattedDateTime = startDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+    	attributeMap.put("start-date", formattedDateTime);
+    	
+        LocalDateTime endtDateTime = (LocalDateTime) appointment.getEndLocalDateTime();
+        String formattedEndDateTime = endtDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+    	attributeMap.put("end-date", formattedEndDateTime);
+    	
+    	createEditWindow(attributeMap);
+    }
+    private Map<String, Object> previousData;
+    
+    /*
+     * 
+     * Import appointment-object and extract information into a Map<String, Object> to create a ViewWindow
+     * 
+     */
+    public void viewAppointment(Agenda.Appointment appointment) {
+    	
+		Map<String, Object> attributeMap = new LinkedHashMap<String, Object>();
+
+		
+    	attributeMap.put("title", appointment.getSummary());
+    	attributeMap.put("description", appointment.getDescription());
+    	
+    	// Makes sure to just use Strings in EditWindow
+        LocalDateTime startDateTime = (LocalDateTime) appointment.getStartLocalDateTime();
+        String formattedDateTime = startDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+    	attributeMap.put("start-date", formattedDateTime);
+    	
+        LocalDateTime endtDateTime = (LocalDateTime) appointment.getEndLocalDateTime();
+        String formattedEndDateTime = endtDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+    	attributeMap.put("end-date", formattedEndDateTime);
+    	
+    	createViewWindow(attributeMap);
+    }
+    
+    
+    /*
+     * 
+     */
+    public void createAddWindow(Map<String, Object> attributeMap) {
 	    bottomContainer.setSpacing(this.getWidth()-200);
-	    setColumns(columns);
+	    setColumns(attributeMap);
 	    applyButton.setOnAction(event -> this.create());
+	    applyButton.setDisable(false);
     	
 	    setVisible(true);
     }
     
-    public void createEditWindow(ObservableList<TableColumn<?, ?>> columns) {
+    // Creates the window in edit mode.
+    // The text fields will be filled with known information
+    // the Button on the bottom right corner turns into applyButton
+    public void createEditWindow(Map<String, Object> attributeMap) {
+    	
+    	previousData = (new LinkedHashMap<String, Object>(attributeMap)); // Important to find a match in TaskView
+    	
+    	bottomContainer.setSpacing(this.getWidth()-200);
+	    
+	    setColumns(attributeMap);
+	    fillTextOfGrid(attributeMap);
+ 
+	    applyButton.setOnAction(event -> this.apply());  
+	    applyButton.setDisable(false);
+	    
+	    setVisible(true);
+	    
+    }
+    
+    /*
+     * @import Map<String, Object> attributeMap
+     * Creates an View Window to see all attributes. It is not possible to change them
+     * 
+     */
+    public void createViewWindow(Map<String, Object> attributeMap) {
 	    bottomContainer.setSpacing(this.getWidth()-200);
-	    setColumns(columns);
-	    applyButton.setOnAction(event -> this.apply());
+	    setColumns(attributeMap, false);
+	    fillTextOfGrid(attributeMap);
+	    
+	    applyButton.setDisable(true);
     	
 	    setVisible(true);
-    
     }
     
-    
-    public void setColumns(ObservableList<TableColumn<?, ?>> columns) {
-    	// go through all Columns and add textinput in the new Window
-    	for (int i = 0; i < columns.size(); i++) {
-    		TableColumn<?, ?> column = columns.get(i);
+    /*
+     * 
+    * Uses an Map to create the Textfields with their Labels in EditWindow
+    * 
+    */
+    public void setColumns(Map<String, Object> attributeMap) {
+    	// goes through all keys and adds an label and a textfield in the new Window
+    	int i = 0;
+    	for (String key: attributeMap.keySet()) {
             
-    		Label label = new Label(column.getText());
+    		Label label = new Label(key);
             label.setStyle("-fx-padding: 5px;");
             
             TextField text = new TextField();
             
     		grid.add(label, 0, i);
     		grid.add(text, 1, i);
+    		i += 1;
     	}
-    	
+    }
+    public void setColumns(Map<String, Object> attributeMap, boolean editable) {
+    	// goes through all keys and adds an label and a textfield in the new Window
+    	int i = 0;
+    	for (String key: attributeMap.keySet()) {
+            
+    		Label label = new Label(key);
+            label.setStyle("-fx-padding: 5px;");
+            
+            TextField text = new TextField();
+        	text.setEditable(editable);
+            
+    		grid.add(label, 0, i);
+    		grid.add(text, 1, i);
+    		i += 1;
+    	}
+    }
+    
+    /* fills TextFields with information it finds in attributeMap
+    *
+    */
+    public void fillTextOfGrid(Map<String, Object> attributeMap) {
+        int i = 1;
+        for (String key : attributeMap.keySet()) {
+            TextField text = (TextField) grid.getChildren().get(i);
+            Object value = attributeMap.get(key);
+            
+            if (value instanceof String) {
+                text.setText((String) value);
+            } else {
+                // Handle other data types
+                text.setText("Unsupported Type");
+            }
+            
+            i += grid.getColumnCount();
+        }
     }
     
     
     
+    /* 
+    * gets called by createButton creates a new Item in TaskView
+    */
     private void create() {
-    	// this methods aspect a grid in the window with one label and another text column
+    	// this method aspects a grid in the window with a label and a text column
     	// e.g.: Description = "HEllo"
     	
 
-    	Map<String, Object> gridMap = new HashMap<>();
+    	Map<String, Object> gridMap = new LinkedHashMap<>();
     	
     	// Create Map out of Grid with Label and Text
     	for (int i = 1; i <= grid.getChildren().size(); i += grid.getColumnCount()) {
@@ -136,17 +259,22 @@ public class EditWindow extends BorderPane{
     		TextField text = (TextField) grid.getChildren().get(i);   		
     		gridMap.put(label.getText(), text.getText());	
     	}
-
-    	parent.addItem(gridMap);
-
+    	
+    	if (onCreateCallback != null) {
+    		onCreateCallback.onButtonClicked(gridMap);
+    	}
+    	
     	close();
     	
     }
     
-    
+    // gets called by applyButton
+    // Method that is run by the button Apply. It will change the selected Item
     private void apply() {
     	
-    	Map<String, Object> gridMap = new HashMap<>();
+    	Map<String, Object> gridMap = new LinkedHashMap<>();
+    	
+    	gridMap.put("previousData", previousData);
     	
     	// Create Map out of Grid with Label and Text
     	for (int i = 1; i <= grid.getChildren().size(); i += grid.getColumnCount()) {
@@ -154,19 +282,57 @@ public class EditWindow extends BorderPane{
     		TextField text = (TextField) grid.getChildren().get(i);   		
     		gridMap.put(label.getText(), text.getText());	
     	}
-
-    	parent.editItem(gridMap);
     	
+    	// 
+        if (onApplyButtonClickedCallback != null) {
+            onApplyButtonClickedCallback.onButtonClicked(gridMap);
+        }
     	close();
     	
     }
     
-    
+    // gets called by closeButton
+    // closes the window by making it invisible
     public void close() {
     	
     	grid.getChildren().clear();
     	setVisible(false);
     	
+    }
+    
+    
+    //
+    // CALLBACK
+    //
+    
+    /*
+     *  Callback when apply Button is clicked in edit mode
+     *  will send changed Map to the calling Object
+     */
+    public interface OnButtonClickedCallback {
+        void onButtonClicked(Map<String, Object> data);
+    }
+    
+    private OnButtonClickedCallback onApplyButtonClickedCallback; 
+
+    public void setCallback(OnButtonClickedCallback callback) {
+        this.onApplyButtonClickedCallback = callback;
+    }
+    
+    
+
+    /*
+     *  Callback when creatButton is clicked in AddMode
+     *  send a Map back to the Object that "listens" to this
+     */
+    public interface OnCreateCallback {
+        void onButtonClicked(Map<String, Object> data);
+    }
+    
+    private OnCreateCallback onCreateCallback; 
+
+    public void setCallback(OnCreateCallback callback) {
+        this.onCreateCallback = callback;
     }
     
 }

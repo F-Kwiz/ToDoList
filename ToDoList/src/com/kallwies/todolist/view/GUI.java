@@ -2,6 +2,7 @@ package com.kallwies.todolist.view;
 
 
 import com.kallwies.todolist.controller.*;
+import com.kallwies.todolist.view.taskview.TaskView;
 
 import javafx.application.*;
 import javafx.event.ActionEvent;
@@ -25,14 +26,17 @@ import java.util.HashMap;
 public class GUI extends Application {
 	
 	static FrontEndController controller = new FrontEndController();
-	static String filePath = "src/com/kallwies/todolist/controller/data.xml";
 	static String savePath = "src/com/kallwies/todolist/controller/data.xml";
-	StackPane mainWindow = new StackPane();
 	
-	
-    TableView tableView = new TableView();
-	ObservableList<Map<String, Object>> tableItems = FXCollections.<Map<String, Object>>observableArrayList();
-    EditWindow overlayWindow = new EditWindow(this);
+	StackPane root = new StackPane();
+    Scene scene = new Scene(root, 800, 640);
+    VBox mainWindow = new VBox();
+	HBox menus = new HBox();
+    
+    TaskView taskView = new TaskView();
+    CalendarView calendarView = new CalendarView();
+    
+    EditWindow overlayWindow = new EditWindow();
     
     
 	@Override
@@ -41,152 +45,199 @@ public class GUI extends Application {
         main.setTitle("Tasks");
     	Font titleFont = Font.font("Arial", FontWeight.BOLD, 30);
     	
-        VBox listWindow = new VBox();
+
         
         	Label title = new Label("Tasks");
         	title.setAlignment(Pos.CENTER);
         	title.setFont(titleFont);
         	
-        	HBox menus = new HBox();
-        	
-		        //Buttons
-	        	VBox menu = new VBox();
-	        	
-        		// ADD BUTTON
-		        Button addButton = new Button("Add");
-		        addButton.setOnAction(new EventHandler<ActionEvent>() {
-		            @Override
-		            public void handle(ActionEvent event) {
-		                handleAddButtonClick();
-		            }});
-		        // lambda alternative
-		        //addButton.setOnAction(event -> controller.handleAddButtonClick());
-		        
-		        //EDIT BUTTON
-		        Button editButton = new Button("Edit");
-		        editButton.setOnAction(event -> handleEditButtonClick());
-		        
-		        //DELETE BUTTON
-		        Button deleteButton = new Button("Delete");
-		        deleteButton.setOnAction(event -> handleDeleteButtonClick());
-		        
-		        //LOAD BUTTON
-		        Button loadButton = new Button("Load");
-		        loadButton.setOnAction(event -> handleLoadButtonClick());
-		        
-		        // SAVE BUTTON
-		        Button saveButton = new Button("Save");
-		        saveButton.setOnAction(event -> handleSaveButtonClick());
-		        
-		        menu.getChildren().add(addButton);
-		        menu.getChildren().add(editButton);
-		        menu.getChildren().add(deleteButton);
-		        menu.getChildren().add(loadButton);
-		        menu.getChildren().add(saveButton);
 
-		        
-		        
-		        // Add a Box for the TableView
-		        VBox listbox = new VBox(tableView);
-        
-        
-	        menus.getChildren().add(menu);
-	        menus.getChildren().add(listbox);
-        
+        		
+        		// Create TreeView for File Selection
+        		FileSelection fileSelection = new FileSelection(main);
+        		
+        		// Add Listeners 
+	                fileSelection.selectedFilePath().addListener((observable, oldValue, newValue) -> {
+	                    loadFile((String) newValue);
+	                    savePath = newValue;
+	                });
+	        		
+	                menus.getChildren().add(fileSelection);
+        	
+				// Create Window for the View of the Tables
+				StackPane listbox = new StackPane();
+			        
+				   // Add a Box for the TableView
+				   taskView.setVisible(false);
+				   listbox.getChildren().add(taskView);
+				   listbox.getChildren().add(calendarView);
+				   menus.getChildren().add(listbox);
+			        
+				 // Create Menu on the right to switch mode
+				 VBox modes = new VBox();
+				 
+				 Button taskViewButton = new Button("TaskView");
+				 taskViewButton.setOnAction(event -> showTaskView());
+				 
+				 Button calendarViewButton = new Button("CalendarView");
+				 calendarViewButton.setOnAction(event -> showCalendarView());
+				 
+
+				 modes.getChildren().add(taskViewButton);
+				 modes.getChildren().add(calendarViewButton);
+				 
+				 menus.getChildren().add(modes);
+			     
+
 	    //
-	    listWindow.getChildren().add(title);
-	    listWindow.getChildren().add(menus);
+	    mainWindow.getChildren().add(title);
+	    mainWindow.getChildren().add(menus);
         
         
-        mainWindow.getChildren().add(listWindow);
-        mainWindow.getChildren().add(overlayWindow);
-        mainWindow.setMargin(overlayWindow, new Insets(100));
+        root.getChildren().add(mainWindow);
         
-        Scene scene = new Scene(mainWindow, 800, 640);
+
+        root.getChildren().add(overlayWindow); // add EditWindow to root, it is invisible at first
+        
+        root.setMargin(overlayWindow, new Insets(100));
+
         main.setScene(scene);
         
+
         // Listener to adjust the Width of the Objects
         main.widthProperty().addListener((obs, oldValue, newValue) -> {
             double windowWidth = main.getWidth();
-            listWindow.setPrefWidth(windowWidth);
+            mainWindow.setPrefWidth(windowWidth);
             title.setPrefWidth(windowWidth);
-            menu.setPrefWidth(windowWidth / 12);
+            //menu.setPrefWidth(windowWidth / 12);
             listbox.setPrefWidth(windowWidth-(windowWidth/12*2));
         });
         
-        // sets observableList as source for TableView
-        tableView.setItems(tableItems);
+
+        // CALLBACKS
+        editWindowCallbacks();
+        taskViewCallbacks();
+        calendarViewCallbacks();
+        // CALLBACKS
         
         main.show();   
 
 	}
 	
-	
-	public void handleAddButtonClick() {
-		
-		overlayWindow.createAddWindow(tableView.getColumns());
-		
-	}
-	
-	public void handleEditButtonClick() {
-		overlayWindow.createEditWindow(tableView.getColumns());
-
-	}
-	
-	
-	public void handleDeleteButtonClick() {
-		tableItems.remove(tableView.getSelectionModel().selectedItemProperty().get());
-	}
-	
-	
-	public void handleLoadButtonClick() {
-		ArrayList<Map<String, Object>> list = controller.loadXml(filePath);
-		fillListView(list);
-	}
-	
-	public void handleSaveButtonClick() {
-		ArrayList<Map<String, Object>> mapList = new ArrayList<>();
-		for (Object value: tableView.getItems()) {
-			mapList.add((Map<String, Object>) value);
-		}
-		controller.saveXml(mapList, savePath);
-	}
-	
-	
-	public void fillListView(ArrayList<Map<String, Object>> list) {
-		
-		tableView.getItems().clear();
-		tableView.getColumns().clear();
-		
-		Map<String, Object> item1 = new HashMap<>();
-
-		// Goes through the first object in the list and creates columns for all keys of it
-        for (String key : list.get(0).keySet()) {
-    		TableColumn<Map, String> column = new TableColumn<>(key);
-    		column.setCellValueFactory(new MapValueFactory<>(key));
-    		tableView.getColumns().add(column);
-        }
+	//
+	// CALLBACKS
+	//
+	private void editWindowCallbacks() {
+        /*
+         * Add Callback connected with overlayWindow (EditWindow)
+         * It returns a map as soon a button is clicked in EditWindow
+         */
+        overlayWindow.setCallback(new EditWindow.OnButtonClickedCallback() {
+            @Override
+            public void onButtonClicked(Map<String, Object> data) {
+                Map<String, Object> map = data;
+                taskView.editTask(map);
+            }
+        });
         
-        // Goes through all Objects in the list and saves them into an variable which holds it for tableView
-        for (Map<String, Object> Element: list) {
-        	for (String key: Element.keySet()) {
-        		item1.put(key, Element.get(key));
-        	}
-        	tableItems.add(new HashMap<>(item1));
-        	item1.clear();
-        }
+        overlayWindow.setCallback(new EditWindow.OnCreateCallback() {
+            @Override
+            public void onButtonClicked(Map<String, Object> data) {
+                Map<String, Object> map = data;
+                taskView.addTask(map);
+            }
+        });
+	}
+		
+	private void taskViewCallbacks() {
+        /*
+         * Is triggered when a Task is edited
+         * Throws new information from TaskView into calendarView
+         */
+        taskView.setOnTaskChanged(new TaskView.TaskChangedCallback() {
+            @Override
+            public void taskChanged(ArrayList<Map<String, Object>> list) {
+                calendarView.fillCalendar(list);
+            }
+        });
         
+        /*
+         * Is triggered by EditButton in TaskView
+         * opens edit Window to edit a task
+         */
+        taskView.setOnEditClicked(new TaskView.EditClickedCallback() {
+            @Override
+            public void editClicked(Map<String, Object> task) {
+            	overlayWindow.createEditWindow(task);
+            }
+        });
+        /*
+         * Is triggered by addButton in TaskView
+         * opens edit Window to add a task to taskList in TaskView
+         */
+        taskView.setCallback(new TaskView.AddClickedCallback() {
+            @Override
+            public void addClicked(Map<String, Object> task) {
+            	overlayWindow.createAddWindow(task);
+            }
+        });
+	}
+	
+	private void calendarViewCallbacks() {
+		/*
+		 *  Used when Calendar triggers an edit of an appointment (right click on appointment)
+		 */
+        calendarView.setCallback(new CalendarView.EditCallback() {
+            @Override
+            public void runCallback(Map<String, Object> task) {
+            	overlayWindow.createEditWindow(task);
+            }
+        });
+        /*
+         * Used when Calendar triggers a view of an appointment (double click on appointment)
+         */
+        calendarView.setCallback(new CalendarView.ViewCallback() {
+            @Override
+            public void runCallback(Map<String, Object> task) {
+            	overlayWindow.createViewWindow(task);
+            }
+        });
+	}
+	//
+	// CALLBACKS
+	//
+	
+	
+	/*
+	 * @import String filePath <-- from Listener on FileSelection
+	 * Loads data from an XML File
+	 */
+	public void loadFile(String filePath) {
+		if (filePath != "") {
+			ArrayList<Map<String, Object>> list = controller.loadXml(filePath);
+			if (list.size() > 0) {
+				taskView.loadInTasks(list);
+				calendarView.fillCalendar(list);
+			} 
+		} else {System.out.println("Method loadFile in GUI got an empty String as filePath");}
+	}
+
+	
+	public void showTaskView() {
+		taskView.setVisible(true);
+		calendarView.setVisible(false);
+	}
+	
+	public void showCalendarView() {
+		calendarView.setVisible(true);
+		taskView.setVisible(false);
+	}
+	
+	public EditWindow getEditWindow() {
+		return overlayWindow;
 	}
 	
 	
-	public void addItem(Map<String, Object> items) {
-		tableItems.add(items);
-	}
-	
-	public void editItem(Map<String, Object> item) {
-		Map<String, Object> selection = (Map<String, Object>) tableView.getSelectionModel().selectedItemProperty().get();
-		tableItems.set(tableItems.indexOf(selection),  item);
-	}
 	
     public static void main(String[] args) {
         Application.launch(args);
