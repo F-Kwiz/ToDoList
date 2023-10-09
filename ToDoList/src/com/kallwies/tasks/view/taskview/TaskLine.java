@@ -1,4 +1,4 @@
-package com.kallwies.todolist.view.taskview;
+package com.kallwies.tasks.view.taskview;
 
 
 import java.util.ArrayList;
@@ -110,7 +110,6 @@ public class TaskLine extends VBox{
 		
 		// listener to size to change size of children dynamically 
         main.widthProperty().addListener((obs, oldValue, newValue) -> {
-        	System.out.println(main.getWidth());
             double windowWidth = main.getWidth();
         });
 		

@@ -1,8 +1,11 @@
-package com.kallwies.todolist.view;
+package com.kallwies.tasks.view.Selection;
 
 import java.io.File;
 
 import javafx.scene.control.Button;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.VBox;
@@ -12,30 +15,29 @@ import javafx.stage.Stage;
 import javafx.beans.property.SimpleObjectProperty;
 
 
+// ??? needs to be completely overhauled. ???
+// ??? model logic appears in this View Item. That has to be fixed ???
 
+/*
+ * A VBox with a TreeView to show all necessary files in a directory
+ */
 public class FileSelection extends VBox {
 	
-	Stage main;
 	TreeItem<String> rootItem = new TreeItem<>("root");
 	TreeView<String> tree = new TreeView<String>(rootItem);
 	Button loadButton = new Button("Load Workspace");
 	Button loadFileButton = new Button("Load File");
 	Button saveButton = new Button("Save File");
-	DirectoryChooser directoryChooser = new DirectoryChooser();
 	
-	private SimpleObjectProperty<String> selectedFileProperty = new SimpleObjectProperty<>();
-	String workspacePath = ""; 
+	String workSpacePath = ""; 
 	String filePath = "";
 	
 	
-	public FileSelection(Stage stage) {
-		main = stage;
+	public FileSelection() {
 		
-		loadButton.setOnAction(event -> loadDirectory());
 		loadFileButton.setOnAction(event -> loadFile());
-		saveButton.setOnAction(event -> loadDirectory());
+		//saveButton.setOnAction(event -> loadDirectory());
 		
-		getChildren().add(loadButton);
 		getChildren().add(loadFileButton);
 		getChildren().add(tree);
 		
@@ -48,10 +50,12 @@ public class FileSelection extends VBox {
 		
 	}
 	
-	
+	/*
+	 * gets called when an item in treeview is doubleClicked
+	 */
 	private void loadFile() {
 		TreeItem treeItem = tree.getSelectionModel().selectedItemProperty().get();
-		setFilePath(getPathOfItem(treeItem));
+		// implement further logic here
 	}
 	
 	
@@ -65,21 +69,25 @@ public class FileSelection extends VBox {
 				        treeItem = treeItem.getParent();
 				        path = treeItem.getValue() + "\\" + path;
 			    }
-			    path = workspacePath + "\\" + path; 
+			    path = workSpacePath + "\\" + path; 
 			}
 		} else {System.out.println("Fileselection-getPathOfItem: No File was selected. treeItem == null");}
 		return path;
 	}
 	
 	
-	private void loadDirectory() { 
-        File selectedDirectory = directoryChooser.showDialog(main);
-        if (selectedDirectory != null) {
-            workspacePath = selectedDirectory.getAbsolutePath();
-            rootItem.getChildren().clear();
-	        rootItem.setValue(selectedDirectory.getName());
-			populateTreeView(rootItem, selectedDirectory);	
-        }
+	public void loadDirectory(String path) { 
+		if (path != null) {
+			if (!path.equals("")) {
+				workSpacePath = path;
+		        File selectedDirectory = new File(workSpacePath);
+		        if (selectedDirectory != null) {
+		            rootItem.getChildren().clear();
+			        rootItem.setValue(selectedDirectory.getName());
+					populateTreeView(rootItem, selectedDirectory);	
+		        }
+			} else {System.out.println("View-FileSelection: the path was an empty String: \"\" ");}
+		}
 	}
 	
 	
@@ -95,21 +103,6 @@ public class FileSelection extends VBox {
                 }
             }
         }
-    }
-	
-	
-    public SimpleObjectProperty<String> selectedFilePath() {
-        return selectedFileProperty;
-    }
-	
-    public String getFilePath() {
-        return selectedFileProperty.get();
-    }
-
-    public void setFilePath(String filePath) {
-        selectedFileProperty.set(filePath);
-    }
-	
-	
+    }	
 }
 

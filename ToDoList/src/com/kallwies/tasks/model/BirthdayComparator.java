@@ -1,4 +1,4 @@
-package com.kallwies.todolist.model;
+package com.kallwies.tasks.model;
 
 import java.util.Comparator;
 import java.util.Map;

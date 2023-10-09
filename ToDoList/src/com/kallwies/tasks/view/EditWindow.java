@@ -1,4 +1,4 @@
-package com.kallwies.todolist.view;
+package com.kallwies.tasks.view;
 
 
 import javafx.scene.control.TextField;
@@ -16,7 +16,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import jfxtras.scene.control.agenda.Agenda;
-import jfxtras.scene.control.agenda.Agenda.Appointment;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -46,8 +45,6 @@ public class EditWindow extends BorderPane{
     // body container
     HBox bodyContainer = new HBox();
     GridPane grid = new GridPane();
-	private Appointment appointment;
-
 
 
 	
@@ -77,7 +74,7 @@ public class EditWindow extends BorderPane{
 		    
         
         setTop(topContainer);
-        grid.setHgap(10); // gab between columns
+        grid.setHgap(10); // gap between columns
         bodyContainer.getChildren().add(grid);
         setCenter(bodyContainer);
         setBottom(bottomContainer);
@@ -139,7 +136,7 @@ public class EditWindow extends BorderPane{
     
     
     /*
-     * 
+     * Creates an Window with empty text field to create a new Task
      */
     public void createAddWindow(Map<String, Object> attributeMap) {
 	    bottomContainer.setSpacing(this.getWidth()-200);

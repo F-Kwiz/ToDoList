@@ -1,34 +1,42 @@
-package com.kallwies.todolist.view.taskview;
+package com.kallwies.tasks.view.taskview;
 
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.kallwies.todolist.view.EditWindow.OnButtonClickedCallback;
+import com.kallwies.tasks.view.Selection.*;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.SplitPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 
-public class TaskView extends VBox {
+public class TaskView extends SplitPane {
 	
 	VBox taskList = new VBox();
+	VBox view = new VBox();
+	Selection selection;
 	
-	public TaskView() {
+	Label title = new Label("Table");
+	
+	public TaskView(Selection selection) {
+		this.selection = selection;
+		this.getItems().add(selection);
 		addButtons();
 	}
 	
+	
 	/*
-	 * Adds Button to this View
+	 * Adds Button and the TaskLines to View
+	 * then adds View to TaskView
 	 */
 	private void addButtons() {
 		//Buttons
@@ -36,11 +44,10 @@ public class TaskView extends VBox {
     	menu.setSpacing(20);
     	
     	// File Title
-    	Label fileName = new Label("Table");
     	Font fileTitleFont = Font.font("Arial", FontWeight.BOLD, 20);
-    	fileName.setFont(fileTitleFont);
-    	menu.getChildren().add(fileName);
-    	menu.setMargin(fileName, new javafx.geometry.Insets(0, 40, 0, 80));
+    	title.setFont(fileTitleFont);
+    	menu.getChildren().add(title);
+    	menu.setMargin(title, new javafx.geometry.Insets(0, 40, 0, 80));
     	
 		// ADD BUTTON
         Button addButton = new Button("Add");
@@ -68,10 +75,17 @@ public class TaskView extends VBox {
         menu.getChildren().add(deleteButton);
         menu.getChildren().add(saveButton);
 		
-        this.getChildren().add(menu);
-        this.getChildren().add(taskList);
+        view.getChildren().add(menu);
+        view.getChildren().add(taskList);
+        
+        this.getItems().add(view);
 	}
 	
+	
+	///
+	/// Initial
+	/// IMPORT
+	///
 	
 	
 	/*
@@ -79,18 +93,48 @@ public class TaskView extends VBox {
 	 * Creates all needed TaskLines with information from XML-Files
 	 * 
 	 */
-	public void loadInTasks(ArrayList<Map<String, Object>> tasks) {
+	public void importData(ArrayList<Map<String, Object>> groups) {
+		
+		selection.importData(groups);
 		
 		taskList.getChildren().clear();
 		
-		for(Map<String, Object> task: tasks) {
-			TaskLine newLine = new TaskLine();
-			newLine.fillTask(task);
-			taskList.getChildren().add(newLine);
+		for(Map<String, Object> group: groups) {
+			// handle group ??? add method ???
+			for (Map<String, Object> task : getTasksFromGroup(group)) {
+				TaskLine newLine = new TaskLine();
+				newLine.fillTask(task);
+				taskList.getChildren().add(newLine);
+			}
 		}
 	}
 	
+	/*
+	 * Helper Function importdata
+	 * gets a list of Map<String,Object>> out of a group Map<String,Object>> out of key "tasks"
+	 */
+    private ArrayList<Map<String, Object>> getTasksFromGroup(Map<String, Object> group) {
+        if (group.containsKey("tasks")) {
+            Object tasksObject = group.get("tasks");
+            if (tasksObject instanceof ArrayList<?>) {
+                try {
+                    @SuppressWarnings("unchecked")
+                    ArrayList<Map<String, Object>> taskArrayList = (ArrayList<Map<String, Object>>) tasksObject;
+                    return taskArrayList;
+                } catch (ClassCastException | NullPointerException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
+    }
 	
+	
+    
+    ///
+    /// EXPORT
+    ///
+    
 	/*
 	 * 
 	 * Creates ArrayList<Map<String,Object>> out of tasks in this.tasklist
@@ -108,6 +152,10 @@ public class TaskView extends VBox {
 	}
 	
 	
+	
+	///
+	/// GET AND SET
+	///
 	
 	/*
 	 * @import Map<String, Object> map <-- from parent
@@ -175,7 +223,29 @@ public class TaskView extends VBox {
 	}
 	
 	
-
+	/*
+	 * sets the Children of taskList
+	 * will clear Children first
+	 * 
+	 */
+	public void importGroup(Map<String, Object> group) {
+		
+		title.setText((String)group.get("group"));
+		
+		ArrayList<Map<String, Object>> groupTasks = (ArrayList<Map<String, Object>>) group.get("tasks");
+		taskList.getChildren().clear();
+		for (Map<String, Object> task : groupTasks) {
+			TaskLine newLine = new TaskLine();
+			newLine.fillTask(task);
+			taskList.getChildren().add(newLine);
+		}
+	}
+	
+	
+	///
+	/// Handle Buttons
+	///
+	
 	/*
 	 * 
 	 */
@@ -242,15 +312,15 @@ public class TaskView extends VBox {
 	 * 
 	 */
 	private void handleSaveButtonClick(){
-		 if (saveClickedCallback != null) {
-			 saveClickedCallback.saveClicked();
+		 if (saveClickedCallback != null) { 
+			 saveClickedCallback.saveClicked(title.getText());
 		 }
 	}
 	
 	
-	 //
-	 // CALLBACKS
-	 //
+	 ///
+	 /// CALLBACKS
+	 ///
 	
 	/*
 	 * Callback When Task is changed
@@ -299,7 +369,7 @@ public class TaskView extends VBox {
 	 * Callback When Save is clicked
 	 */
     public interface SaveClickedCallback {
-        void saveClicked();
+        void saveClicked(String groupName);
     }
     
     private SaveClickedCallback saveClickedCallback; 

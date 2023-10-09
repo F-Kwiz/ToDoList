@@ -1,4 +1,4 @@
-package com.kallwies.todolist.view;
+package com.kallwies.tasks.view;
 
 
 import java.time.LocalDate;
@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.kallwies.todolist.view.taskview.TaskView.AddClickedCallback;
+import com.kallwies.tasks.view.taskview.TaskView.AddClickedCallback;
 
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
@@ -73,7 +73,7 @@ public class CalendarView extends VBox{
 	 * Gets task information saved to a map and creates an appointment with given information
 	 * 
 	 */
-	public void fillCalendar(ArrayList<Map<String, Object>> tasks){
+	public void importData(ArrayList<Map<String, Object>> tasks){
 		agenda.appointments().clear();
 		for (Map<String, Object> task: tasks) {
 				Agenda.AppointmentImplLocal appointment = createAgendaOutOfTask(task);
@@ -120,6 +120,7 @@ public class CalendarView extends VBox{
 			case "start-date": 
 				try {
 	                String dateTimeString = (String) task.get(key);
+	                System.out.println(dateTimeString);
 	                LocalDateTime dateTime = LocalDateTime.parse(dateTimeString, formatter);
 	                newAgenda.setStartLocalDateTime(dateTime);
 				}

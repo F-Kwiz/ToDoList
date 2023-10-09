@@ -1,6 +1,5 @@
-package com.kallwies.todolist.controller;
+package com.kallwies.tasks.controller;
 
-import com.kallwies.todolist.model.*;
 import java.util.Map;
 import java.util.ArrayList;
 
