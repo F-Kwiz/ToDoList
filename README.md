@@ -1,11 +1,11 @@
 # ToDoList
-A Application that helps to strcuture your week.
+A application that helps to strcuture your week.
 
 It follows the principles of the MVC-Model.
 Additionally the classes use a callback whenever events occur.
-This helps to make the classes more independent from each other.
+This helps to make the classes more independent of each other.
 
-The Software follows an hierarchical character.
+The Software follows an hierarchical order.
 
 The Controller holds references to model and view and handles the exchange of information between those two.
 It is at the top of the hierarchy.
