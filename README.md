@@ -1,7 +1,7 @@
 # ToDoList
 A Application that helps to strcuture your week.
 
-It is follows the principles of the MVC-Model.
+It follows the principles of the MVC-Model.
 Additionally the classes use a callback whenever events occur.
 This helps to make the classes more independent from each other.
 
