@@ -7,7 +7,7 @@ This helps to make the classes more independent of each other.
 
 The Software follows an hierarchical order.
 
-The Controller holds references to model and view and handles the exchange of information between those two.
+The controller holds references to model and view and handles the exchange of information between those two.
 It is at the top of the hierarchy.
 
 Model holds the necessary data and manipulates it.
