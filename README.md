@@ -18,3 +18,7 @@ View istelf shows the data and handles the users input.
 View has a TaskView, to show the user all loaded tasks.
 And it has a CalendarView, to show the user when a task is due.
 The user can add, edit and delete tasks, aswell he can organize tasks in different groups.
+
+
+Uses:
+JavaFX, JFXtras
