@@ -12,9 +12,9 @@ module ToDoList {
 	requires org.jdom2;
 	requires jfxtras.all;
 	requires java.xml;
-	exports com.kallwies.root;
-	exports com.kallwies.workspacefinder;
-	exports com.kallwies.tasks.view;
-	exports com.kallwies.tasks.model;
-	exports com.kallwies.tasks.controller;
+	exports main.java.root;
+	exports main.java.workspacefinder;
+	exports main.java.tasks.view;
+	exports main.java.tasks.model;
+	exports main.java.tasks.controller;
 }
