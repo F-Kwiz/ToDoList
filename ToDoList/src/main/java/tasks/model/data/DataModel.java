@@ -14,9 +14,8 @@ import java.util.Map;
  */
 public class DataModel {
     
-	private ArrayList<Task> tasks = new ArrayList<Task>();
     private ArrayList<TaskGroup> groups = new ArrayList<TaskGroup> ();
-    
+
     
     public DataModel() {
         
@@ -92,23 +91,22 @@ public class DataModel {
     }
     
     
-    /*
+    /**
      * gets tasks from a map of a group and adds them to a TaskGroup instance
+     * 
+     * @param taskArrayList ArrayList<Map<String, Object>> A list with all tasks of a group
+     * @param groupName String the name of the group of Task
      */
     private void addTasksToGroup(ArrayList<Map<String, Object>> taskArrayList, String groupName) {
         for (Map<String, Object> task : taskArrayList) {
+        	task.put("group", groupName); // Adds the group to the Task
             Task newTask = new Task();
             newTask.fillWithMap(task);
-            tasks.add(newTask);
             getGroupByName(groupName).addTask(newTask);
         }
     }
     
-    
-    
-    
-    
-	
+
 	///
 	/// EXPORT
 	///

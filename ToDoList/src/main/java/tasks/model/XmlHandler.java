@@ -54,22 +54,21 @@ public class XmlHandler {
 		private static Map<String,Object> itemMap = new HashMap<String,Object>();
 
 		
-		/*
-		 * @import: List<String>
+		/**
 		 * Gets a list with paths and feeds them to method loadFile
 		 * Then proceeds to save the return of method loadFile into finalList
-		 * @return: ArrayList<Map<String, Object>>
+		 * 
+		 * @param paths List<String>
+		 * @return finalList ArrayList<Map<String, Object>> 
 		 */
 		static public ArrayList<Map<String, Object>> loadAllFiles(List<String> paths) {
 			for (String path: paths) {
 				finalList.add(new HashMap<String,Object>(loadFile(path)));
 			}
-			System.out.println(finalList);
 			return finalList;
 		}
 		
-		/*
-		 * 
+		/**
 		 * loads an xml file behind path and puts its elements into a Map
 		 * The Map contains header information and a body "tasks" with the elements of the file. 
 		 * 

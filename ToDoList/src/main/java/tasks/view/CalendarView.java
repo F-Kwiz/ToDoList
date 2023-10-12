@@ -66,6 +66,11 @@ public class CalendarView extends VBox{
 	    
 	}
 	
+	
+	///
+	/// IMPORT
+	///
+	
 	/*
 	 * @import ArrayList<Map<String, Object>> tasks <-- from: 
 	 * Gets task information saved to a map and creates an appointment with given information
@@ -83,10 +88,11 @@ public class CalendarView extends VBox{
 		}
 	}
 	
-	/*
-	 * @import Agenda.AppointmentImplLocal appointment
+	/**
 	 * gets an appointment and exports its information as map
-	 * @return Map<String, Object> map
+	 * 
+	 * @param appointment Agenda.AppointmentImplLocal
+	 * @return map Map<String, Object> gets information of an appointment and puts it into a map
 	 */
 	public Map<String, Object> createMapOutOfAppointment(Agenda.AppointmentImplLocal appointment){
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
@@ -169,9 +175,9 @@ public class CalendarView extends VBox{
 	}
 	
 	
-	//
-	// BUTTON METHODS
-	//
+	///
+	/// BUTTON METHODS
+	///
 	
 	/*
 	 * changes the displayed Date to a week prior
@@ -200,9 +206,9 @@ public class CalendarView extends VBox{
 	}
 	
 	
-	//
-	// CALLBACK
-	//
+	///
+	/// CALLBACK
+	///
 	
 	/*
 	 * Callback to edit an appointment

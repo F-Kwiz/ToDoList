@@ -5,12 +5,12 @@ import java.util.LinkedHashMap;
 
 public class Task {
 	
-	private String group;
+	private String group = "undefined";
 	
-	private String id;
-	private String parent_id;
-	private String title;
-	private String description;
+	private String id = "";
+	private String parent_id = "";
+	private String title = "";
+	private String description = "";
 	private String start_date;
 	private String end_date;
 	

@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class TaskGroup {
@@ -12,6 +13,9 @@ public class TaskGroup {
 	private String path = "";
 	
 	private ArrayList<Task> tasks = new ArrayList<Task>();
+	
+    private List<Integer> freeIds = new ArrayList<Integer>();
+	private int lastAssignedId = 0;
 	
 	/**
 	 * Constructor.	
@@ -79,11 +83,44 @@ public class TaskGroup {
 	 * 
 	 */
 	public void addTask(Task task) {
+		lastAssignedId = getNewId();
+		task.setId(String.valueOf(lastAssignedId));
+		task.setGroup(name);
 		tasks.add(task);
 	}
+	public void addTask(Map<String, Object> taskMap) {
+		lastAssignedId = getNewId();
+        Task newTask = new Task();
+        newTask.fillWithMap(taskMap);
+        newTask.setId(String.valueOf(lastAssignedId));
+        newTask.setGroup(name);
+		tasks.add(newTask);
+	}
+	
 	
 	public ArrayList<Task> getTasks() {
 		return tasks;
+	}
+	
+	
+	
+	///
+	/// Helper Functions
+	///
+	
+	/**
+	 * gets a new id for a task
+	 * 
+	 * @return newId Integer returns the new id
+	 */
+	private Integer getNewId() {
+        int newId;
+        if (freeIds.isEmpty()) {
+            newId = ++lastAssignedId;
+        } else {
+            newId = freeIds.remove(0);
+        }
+        return newId;
 	}
 	
 	
@@ -121,9 +158,27 @@ public class TaskGroup {
 		return null;
 	}
 	
-	public void deleteTask(String id) {
-		tasks.remove(getTaskById(id));
+	public void editTask(Map<String, Object> data) {
+		getTaskById((String)data.get("id")).fillWithMap(data);;		
 	}
+	
+	
+	public void deleteTask(String id) {
+		if (tasks.remove(getTaskById(id))) {
+			try {
+				freeIds.add(Integer.parseInt(id));
+			} catch (NumberFormatException e) {
+			    System.out.println("TaskGroup-deleteTask: String id was not numeric: " + id);
+			}
+		}
+	}
+	
+	public Map<String, Object> getPlaceboTask() {
+		Task task = new Task();
+		task.setGroup(name);
+		return task.getMap();
+	}
+	
 	
 	
 	public String getName() {
@@ -141,6 +196,10 @@ public class TaskGroup {
 	public void setPath(String path) {
 		this.path = path;
 	}
+
+
+
+
 	
 	
 	

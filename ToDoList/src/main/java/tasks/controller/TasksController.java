@@ -38,7 +38,16 @@ public class TasksController {
 		 * 
 		 */
 		public ViewCallback() {
+			TaskView();
+			TaskViewGroupSelection();
 			
+			EditWindow();
+		}
+			//
+			// TaskView Buttons
+			//
+			
+		private void TaskView() {
 			/**
 			 * When save Button is clicked in View-TaskView
 			 * 
@@ -60,12 +69,37 @@ public class TasksController {
 	            public void startCallback(String groupname, String task_id) {
 	            	modelController.getDataModel().deleteTask(groupname, task_id);
 	            	importGroupDataIntoView(groupname);
+	            	viewController.getCalendarView().importData(modelController.getDataModel().getData()); // ??? Has to be improved. also in Apply and Create Button ???
 	            }
 	        });
 			
+			/**
+			 * When Edit Button is Clicked in TaskView. It will open an EditWindow, where the user can change attributes of Task
+			 * Edit Window needs information about task from DataModel.
+			 * 
+			 */
+			viewController.viewControllerCallbacks.setCallback(new ViewController.ViewControllerCallbacks.EditClickedCallback() {
+	            @Override
+	            public void startCallback(String groupname, String task_id) {
+	            	viewController.getEditWindow().createEditWindow(modelController.getDataModel().getGroupByName(groupname).getTaskById(task_id).getMap());
+	            }
+	        });
 			
-			
-			
+			/**
+			 * When Add Button is Clicked in TaskView. It will open an EditWindow, where the user can create attributes of a new Task
+			 * Edit Window needs information about any task from group from DataModel.
+			 * 
+			 */
+			viewController.viewControllerCallbacks.setCallback(new ViewController.ViewControllerCallbacks.AddClickedCallback() {
+	            @Override
+	            public void startCallback(String groupname) {
+	            	viewController.getEditWindow().createAddWindow(modelController.getDataModel().getGroupByName(groupname).getPlaceboTask());
+	            }
+	        });
+		}
+		
+		
+		private void TaskViewGroupSelection() {
 			/**
 			 * When a group in GroupSelection is DoubleClicked
 			 * loads the Map from the doubleClicked group and calls importGroup of TaskView with the group Map as parameter
@@ -79,11 +113,39 @@ public class TasksController {
 	            			);
 	            }
 	        });
+		}
+		
+		
+		private void EditWindow() {
+			/**
+			 * When Button Apply is clicked in EditWindow
+			 * get new information from EditWindow about a task and writes them into task.
+			 * then imports the group of given task into View
+			 * 
+			 */
+			viewController.viewControllerCallbacks.setCallback(new ViewController.ViewControllerCallbacks.ApplyClickedCallback() {
+				@Override
+				public void startCallback(Map<String, Object> data) {
+					modelController.getDataModel().getGroupByName((String)data.get("group")).editTask(data);
+	            	importGroupDataIntoView((String)data.get("group"));
+	            	viewController.getCalendarView().importData(modelController.getDataModel().getData());
+				}
+	        });
 			
-			
+			/**
+			 * When Button Create is clicked in EditWindow
+			 * gets filled in information about task and adds task to a group
+			 * then imports the group of given task into View
+			 */
+			viewController.viewControllerCallbacks.setCallback(new ViewController.ViewControllerCallbacks.CreateClickedCallback() {
+				@Override
+				public void startCallback(Map<String, Object> data) {
+					modelController.getDataModel().getGroupByName((String)data.get("group")).addTask(data);
+	            	importGroupDataIntoView((String)data.get("group"));
+	            	viewController.getCalendarView().importData(modelController.getDataModel().getData());
+				}
+	        });
 		}
 		
 	}
-	
-	
 }

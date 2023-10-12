@@ -58,11 +58,22 @@ public class ViewController {
 		
 		callback.GUICallback(); // initiates every callback of gui
 		callback.taskViewCallbacks();
+		callback.editWindowCallbacks();
 	}
 	
 	public void importData(ArrayList<Map<String, Object>> data) {
 		taskView.importData(data);
 		calendarView.importData(data);
+	}
+	
+	/**
+	 * import a group in View
+	 * 
+	 * @param group
+	 */
+	public void importGroup(Map<String, Object> group) {
+		taskView.importGroup(group);
+		//calendarView.importGroup(group);
 	}
 	
 	/*
@@ -99,7 +110,9 @@ public class ViewController {
 		return taskView;
 	}
 	
-	
+	public CalendarView getCalendarView() {
+		return calendarView;
+	}
 	
 	
 	///
@@ -144,7 +157,6 @@ public class ViewController {
 	         * Add Callback connected with overlayWindow (EditWindow)
 	         * It returns a map as soon a button is clicked in EditWindow
 	         * 
-	         * 
 	         */
 			editWindow.setCallback(new EditWindow.ApplyClickedCallback() {
 	            @Override
@@ -158,8 +170,8 @@ public class ViewController {
 			editWindow.setCallback(new EditWindow.OnCreateCallback() {
 	            @Override
 	            public void startCallback(Map<String, Object> data) {
-	            	if (viewControllerCallbacks.onCreateCallback != null) {
-	            		viewControllerCallbacks.onCreateCallback.startCallback(data);
+	            	if (viewControllerCallbacks.createClickedCallback != null) {
+	            		viewControllerCallbacks.createClickedCallback.startCallback(data);
 	            	}
 	            }
 	        });
@@ -171,6 +183,7 @@ public class ViewController {
 		 * 
 		 */
 		private void taskViewCallbacks() {
+			
 			/**
 			 * determines the Callback of TaskView.
 			 * passes information to own Callback
@@ -199,6 +212,7 @@ public class ViewController {
 	            	}
 	            }
 	        });
+	        
 	        /*
 	         * Is triggered by addButton in TaskView
 	         * opens edit Window to add a task to taskList in TaskView
@@ -211,6 +225,7 @@ public class ViewController {
 					}
 				}
 	        });
+	        
 	        /*
 	         * Is triggered by saveButton in TaskView
 	         * saves a xml file of a certain group
@@ -286,8 +301,8 @@ public class ViewController {
 		GroupSelectedCallback groupSelectedCallback;
 		
 		// Edit Window
-		OnCreateCallback onCreateCallback;
-		ApplyClickCallback applyClickedCallback;
+		CreateClickedCallback createClickedCallback;
+		ApplyClickedCallback applyClickedCallback;
 		
 		
 		
@@ -320,8 +335,6 @@ public class ViewController {
 		 * Edit Button clicked in TaskView
 		 */
 		interface EditClickedCallback{
-			void startCallback(Map<String, String> task_meta);
-
 			void startCallback(String groupname, String task_id);
 		}
 
@@ -361,20 +374,20 @@ public class ViewController {
 		 * When Create on EditWindow is clicked
 		 * 
 		 */
-		interface OnCreateCallback{
+		interface CreateClickedCallback{
 			void startCallback(Map<String, Object> data);
 		}
-		void setCallback(OnCreateCallback callback){
-			this.onCreateCallback = callback;
+		void setCallback(CreateClickedCallback callback){
+			this.createClickedCallback = callback;
 		}
 		
 		/**
 		 * 
 		 */
-		interface ApplyClickCallback{
+		interface ApplyClickedCallback{
 			void startCallback(Map<String, Object> data);
 		}
-		void setCallback(ApplyClickCallback callback){
+		void setCallback(ApplyClickedCallback callback){
 			this.applyClickedCallback = callback;
 		}
 		
