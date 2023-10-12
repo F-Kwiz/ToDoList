@@ -22,3 +22,6 @@ The user can add, edit and delete tasks, aswell he can organize tasks in differe
 
 Uses:
 JavaFX, JFXtras
+
+Starts with Main.java which implements root.java.
+Both can be find in main/java/root
